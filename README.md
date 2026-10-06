@@ -127,17 +127,12 @@ Then run the app in:
 
 ```bash
 npm run dev     # run the API in watch mode
-npm run start   # run the API once
 ```
 
 ### Mobile
 
 ```bash
-npm start       # start Expo development server
-npm run android  # launch Android
-npm run ios      # launch iOS
-npm run web      # launch web version
-npm run lint     # run Expo lint
+ npx expo start --clear # start Expo development server
 ```
 
 ## Backend Notes
@@ -159,11 +154,5 @@ The Prisma schema defines the database models and relationships driving the app 
 2. Run the backend with `npm run dev` in `server`.
 3. Start the Expo client with `npm start` in `mobile`.
 4. Use the app to create a profile, join an event, and explore matches.
-
-## Contribution
-
-Contributions are welcome. If you want to improve the app, open a feature branch, make your changes, and submit a pull request with a clear summary of the update and testing steps.
-
-## License
 
 This project currently uses the repo's configured licensing setup. Check the repository root for the active license file before publishing or redistributing the project.
