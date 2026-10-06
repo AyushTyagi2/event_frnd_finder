@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MemeResponseType {
+  LOVE
+  MEH
+  NOPE
+}
+
+enum Interest {
+  MEMES
+  TECH
+  MUSIC
+  MOVIES
+  GAMING
+  TRAVEL
+  FOOD
+  SPORTS
+  ANIME
+  READING
+  PHOTOGRAPHY
+  FITNESS
+  ART
+  DANCE
+  COOKING
+  CODING
+  FOOTBALL
+  CRICKET
+  TRAVELING
+  FASHION
+}
+
+model User {
+  id          String     @id @default(uuid()) @db.Uuid
+  name        String
+  email       String?    @unique
+  password    String?
+  gender      String
+  dateOfBirth DateTime   @db.Date
+  about       String?
+  interests   Interest[]
+  createdAt   DateTime   @default(now())
+  profilePic  String?
+
+  eventMembers   EventMember[]
+  memeResponses  MemeResponse[]
+  matchesAsUser1 Match[]        @relation("MatchUser1")
+  matchesAsUser2 Match[]        @relation("MatchUser2")
+}
+
+model Event {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String
+  code       String   @unique
+  profilePic String?
+  venue      String
+  startDate  DateTime @db.Date
+  endDate    DateTime @db.Date
+  createdAt  DateTime @default(now())
+
+  members EventMember[]
+  matches Match[]
+}
+
+model EventMember {
+  id       String   @id @default(uuid()) @db.Uuid
+  eventId  String   @db.Uuid
+  userId   String   @db.Uuid
+  joinedAt DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+}
+
+model Meme {
+  id        String   @id @default(uuid()) @db.Uuid
+  imageUrl  String
+  caption   String
+  createdAt DateTime @default(now())
+
+  responses MemeResponse[]
+}
+
+model MemeResponse {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @db.Uuid
+  memeId    String           @db.Uuid
+  response  MemeResponseType
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meme Meme @relation(fields: [memeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, memeId])
+}
+
+model Match {
+  id         String   @id @default(uuid()) @db.Uuid
+  eventId    String   @db.Uuid
+  user1Id    String   @db.Uuid
+  user2Id    String   @db.Uuid
+  matchScore Decimal
+  createdAt  DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user1 User  @relation("MatchUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2 User  @relation("MatchUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+
+  meeting Meeting?
+
+  @@unique([eventId, user1Id, user2Id])
+}
+
+model MeetingPlace {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  address   String
+  createdAt DateTime @default(now())
+
+  meetings Meeting[]
+}
+
+enum MeetingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model Meeting {
+  id      String @id @default(uuid()) @db.Uuid
+  matchId String @unique @db.Uuid
+  placeId String @db.Uuid
+
+  requesterId String @db.Uuid
+  recipientId String @db.Uuid
+
+  requesterAccepted Boolean @default(false)
+  recipientAccepted Boolean @default(false)
+
+  status    MeetingStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+
+  match Match        @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  place MeetingPlace @relation(fields: [placeId], references: [id])
+}
